@@ -1,0 +1,30 @@
+const express = require("express");
+const {
+  addDoctor,
+  getDoctors,
+  getDoctorById,
+  updateDoctor,
+  deleteDoctor,
+} = require("../../controllers/hris/doctors/add");
+const {
+  addDoctorSchedule,
+  getDoctorsByDate,
+  getUpcomingSchedulesByDoctor,updateDoctorSchedule
+} = require("../../controllers/hris/doctors/schedule");
+
+const router = express.Router();
+
+//doctor
+router.post("/add-doctors", addDoctor);
+router.get("/get-doctors", getDoctors);
+router.get("/get-doctor-by-id", getDoctorById);
+router.put("/update-doctor", updateDoctor);
+router.delete("/delete-doctor", deleteDoctor);
+
+//Schedule
+router.post("/add-doctor-schedule", addDoctorSchedule);
+router.get("/get-doctor-by-date", getDoctorsByDate);
+router.get("/upcoming-schedules", getUpcomingSchedulesByDoctor);
+router.put("/schedule", updateDoctorSchedule);
+
+module.exports = router;

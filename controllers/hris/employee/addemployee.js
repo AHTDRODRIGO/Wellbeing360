@@ -48,7 +48,7 @@ const addEmployee = async (req, res) => {
       ],
     });
 
-    return res.status(201).json({ message: "Employee added successfully" });
+    return res.status(200).json({ message: "Employee added successfully" });
   } catch (error) {
     console.error("Error adding employee:", error);
     return res.status(500).json({ error: "Internal server error" });

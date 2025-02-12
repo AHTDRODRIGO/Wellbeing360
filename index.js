@@ -8,10 +8,12 @@ const socketConfig = require("./config/socket"); // Socket.IO helper for initial
 
 // Import Routes
 const EmployeeRoutes = require("./routes/hris/employee.js");
+const DoctorRoutes = require("./routes/hris/doctors.js");
 
 // Import Models
 // require("./models/Employee");
-
+// require("./models/Doctors.js");
+// require("./models/Doctor_schedule.js");
 
 const app = express();
 const server = http.createServer(app); // Create HTTP server
@@ -36,6 +38,7 @@ app.use(
  
 // Define Routes
 app.use("/v1/wellbeing360/employees", EmployeeRoutes);
+app.use("/v1/wellbeing360/doctors", DoctorRoutes);
 
 // 404 Error Handling
 app.use((req, res) => {
