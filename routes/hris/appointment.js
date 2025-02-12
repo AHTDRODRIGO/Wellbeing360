@@ -12,7 +12,7 @@ const router = express.Router();
 // Book an appointment
 router.post("/book-appointment", bookAppointment);
 router.get("/get-all-book-appointments", getEmployeeAppointments);
-router.delete("/cance-appointment", cancelAppointment);
+router.delete("/cancel-appointment", cancelAppointment);
 router.get("/get-all-appointments", getAllAppointments);
 router.get("/get-appointments-by-doctor", getAppointmentsByDoctor);
 module.exports = router;
