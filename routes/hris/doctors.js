@@ -9,7 +9,9 @@ const {
 const {
   addDoctorSchedule,
   getDoctorsByDate,
-  getUpcomingSchedulesByDoctor,updateDoctorSchedule
+  getUpcomingSchedulesByDoctor,
+  updateDoctorSchedule,
+  deleteDoctorSchedule,
 } = require("../../controllers/hris/doctors/schedule");
 
 const router = express.Router();
@@ -26,5 +28,6 @@ router.post("/add-doctor-schedule", addDoctorSchedule);
 router.get("/get-doctor-by-date", getDoctorsByDate);
 router.get("/upcoming-schedules", getUpcomingSchedulesByDoctor);
 router.put("/schedule", updateDoctorSchedule);
+router.delete("/schedule", deleteDoctorSchedule);
 
 module.exports = router;

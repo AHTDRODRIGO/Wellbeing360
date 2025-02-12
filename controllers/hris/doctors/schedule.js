@@ -180,9 +180,38 @@ const updateDoctorSchedule = async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 };
+const deleteDoctorSchedule = async (req, res) => {
+  try {
+    const { schedule_id } = req.query;
+
+    if (!schedule_id) {
+      return res.status(400).json({ error: "Schedule ID is required" });
+    }
+
+    const deleteQuery = `DELETE FROM doctor_schedule WHERE schedule_id = ?`;
+
+    const [deleteResult] = await sequelize.query(deleteQuery, {
+      replacements: [schedule_id],
+    });
+
+    if (deleteResult.affectedRows === 0) {
+      return res
+        .status(404)
+        .json({ error: "Schedule not found or already removed" });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Doctor schedule deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting doctor schedule:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
 module.exports = {
   addDoctorSchedule,
   getDoctorsByDate,
   getUpcomingSchedulesByDoctor,
   updateDoctorSchedule,
+  deleteDoctorSchedule,
 };
