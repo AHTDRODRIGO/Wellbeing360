@@ -7,6 +7,6 @@ const { getOrdersByEmployee,getAllOrders } = require("../../controllers/wellbein
 router.get("/all", getAllOrders);
 router.post("/place", placeOrderByPrescription);
 router.put("/status/:order_id", updateOrderStatus);
-router.get("/by-employee", getOrdersByEmployee);
+router.get("/by-employee", getOrdersByEmployee); 
 
 module.exports = router;
