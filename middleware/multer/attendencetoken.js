@@ -1,4 +1,4 @@
-const { ensureToken } = require('../../controllers/hris/attendence/getattendence');
+const { ensureToken } = require('../../controllers/wellbeing-360/attendence/getattendence');
 
 
 const ensureTokenMiddleware = async (req, res, next) => {

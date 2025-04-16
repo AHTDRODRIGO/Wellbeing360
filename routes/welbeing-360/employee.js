@@ -4,7 +4,7 @@ const {
   getEmployees,
   getEmployeeByNumber,
   updateEmployee,
-} = require("../../controllers/hris/employee/addemployee");
+} = require("../../controllers/wellbeing-360/employee/addemployee");
 
 const router = express.Router();
 

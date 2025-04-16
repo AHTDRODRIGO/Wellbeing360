@@ -11,7 +11,7 @@ const addDoctor = async (req, res) => {
       work_location,
       availability,
       active_status,
-    } = req.body;
+    } = req.body; 
 
     if (
       !doctor_id ||
@@ -140,7 +140,7 @@ const updateDoctor = async (req, res) => {
   }
 };
 
-const deleteDoctor = async (req, res) => {
+const deleteDoctor = async (req, res) => { 
   try {
     const { doctor_id } = req.query;
 

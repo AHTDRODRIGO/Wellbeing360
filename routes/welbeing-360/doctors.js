@@ -5,14 +5,14 @@ const {
   getDoctorById,
   updateDoctor,
   deleteDoctor,
-} = require("../../controllers/hris/doctors/add");
+} = require("../../controllers/wellbeing-360/doctors/add");
 const {
   addDoctorSchedule,
   getDoctorsByDate,
   getUpcomingSchedulesByDoctor,
   updateDoctorSchedule,
   deleteDoctorSchedule,
-} = require("../../controllers/hris/doctors/schedule");
+} = require("../../controllers/wellbeing-360/doctors/schedule");  
 
 const router = express.Router();
 

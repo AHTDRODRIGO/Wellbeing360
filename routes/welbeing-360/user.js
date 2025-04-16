@@ -5,7 +5,7 @@ const authMiddleware = require("../../middleware/auth/authMiddleware"); // Impor
 // Import controllers
 const {
   UpdateRoleBasedPermissions,
-} = require("../../controllers/hris/rolebasedpermissions/updateRoleBasedPermissions");
+} = require("../../controllers/wellbeing-360/rolebasedpermissions/updateRoleBasedPermissions");
 
 const {
   createUser,
@@ -14,28 +14,28 @@ const {
   resetPassword,
   deleteUserRole,
   deleteUser,
-} = require("../../controllers/hris/user/createUser");
+} = require("../../controllers/wellbeing-360/user/createUser");
 
 const {
   createTFUser,
   addTFUserRole,
   getTFRoles,
   resetTFUserPassword,
-} = require("../../controllers/hris/user/tf_user");
+} = require("../../controllers/wellbeing-360/user/tf_user");
 
 const {
   updateUser,
   updateRolePermissions,
-} = require("../../controllers/hris/user/updateUser");
+} = require("../../controllers/wellbeing-360/user/updateUser");
 
 const {
   getUserByIDORName,
   getAllUsers,
   getPermissionsByRoleId,
-} = require("../../controllers/hris/user/getUser");
+} = require("../../controllers/wellbeing-360/user/getUser");
 
-const { loginUser } = require("../../controllers/hris/user/userLogin"); // Import loginUser
-const { logoutCurrentUser } = require("../../controllers/hris/user/logoutUser"); // Import logoutCurrentUser
+const { loginUser } = require("../../controllers/wellbeing-360/user/userLogin"); // Import loginUser
+const { logoutCurrentUser } = require("../../controllers/wellbeing-360/user/logoutUser"); // Import logoutCurrentUser
 
 // Public routes (no auth required)
 router.post("/userLogin", loginUser);

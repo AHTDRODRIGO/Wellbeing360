@@ -7,15 +7,22 @@ const { sequelize } = require("./config/database");
 const socketConfig = require("./config/socket"); // Socket.IO helper for initialization
 
 // Import Routes
-const EmployeeRoutes = require("./routes/hris/employee.js");
-const DoctorRoutes = require("./routes/hris/doctors.js");
-const Appointment = require("./routes/hris/appointment.js");
+const EmployeeRoutes = require("./routes/welbeing-360/employee.js");
+const DoctorRoutes = require("./routes/welbeing-360/doctors.js");
+const Appointment = require("./routes/welbeing-360/appointment.js");
+const Inventrry = require("./routes/welbeing-360/inventry.js");
+const Prescription = require("./routes/welbeing-360/prescription.js");
+const Order = require("./routes/welbeing-360/oder.js");
 
 // Import Models
 // require("./models/Employee");
 // require("./models/Doctors.js");
 // require("./models/Doctor_schedule.js");
 // require("./models/Appointment.js");
+// require("./models/Inventry.js");
+// require("./models/Prescription.js");
+// require("./models/Prescription-items.js");
+//  
 
 const app = express();
 const server = http.createServer(app); // Create HTTP server
@@ -42,6 +49,9 @@ app.use(
 app.use("/v1/wellbeing360/employees", EmployeeRoutes);
 app.use("/v1/wellbeing360/doctors", DoctorRoutes);
 app.use("/v1/wellbeing360/appointment", Appointment);
+app.use("/v1/wellbeing360/inventry", Inventrry);
+app.use("/v1/wellbeing360/prescription", Prescription);
+app.use("/v1/wellbeing360/oder",Order);
 
 // 404 Error Handling
 app.use((req, res) => {

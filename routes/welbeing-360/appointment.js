@@ -5,7 +5,7 @@ const {
   cancelAppointment,
   getAllAppointments,
   getAppointmentsByDoctor,
-} = require("../../controllers/hris/appointment/bookAppointment");
+} = require("../../controllers/wellbeing-360/appointment/bookAppointment");
 
 const router = express.Router();
 
