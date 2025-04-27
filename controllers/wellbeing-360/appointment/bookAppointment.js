@@ -138,30 +138,41 @@ const getAllAppointments = async (req, res) => {
 };
 const getAppointmentsByDoctor = async (req, res) => {
   try {
-    const { doctor_id } = req.query;
+    const { doctor_id, appointment_date } = req.query;
 
     if (!doctor_id) {
       return res.status(400).json({ error: "Doctor ID is required" });
     }
 
-    const query = `
-        SELECT a.appointment_id, a.appointment_date, a.appointment_status, 
-               e.employee_no, e.name AS employee_name, e.contact_number,
-               ds.start_time, ds.end_time
-        FROM appointment a
-        JOIN employee e ON a.employee_no = e.employee_no
-        JOIN doctor_schedule ds ON a.schedule_id = ds.schedule_id
-        WHERE a.doctor_id = ?
-        ORDER BY a.appointment_date DESC`;
+    let query = `
+      SELECT a.appointment_id, a.appointment_date, a.appointment_status, 
+             e.employee_no, e.name AS employee_name, e.contact_number,
+             ds.start_time, ds.end_time
+      FROM appointment a
+      JOIN employee e ON a.employee_no = e.employee_no
+      JOIN doctor_schedule ds ON a.schedule_id = ds.schedule_id
+      WHERE a.doctor_id = ?
+    `;
+
+    const replacements = [doctor_id];
+
+    if (appointment_date) {
+      query += ` AND a.appointment_date = ?`;
+      replacements.push(appointment_date);
+    }
+
+    query += ` ORDER BY a.appointment_date DESC`;
 
     const [appointments] = await sequelize.query(query, {
-      replacements: [doctor_id],
+      replacements,
     });
 
     if (appointments.length === 0) {
       return res
         .status(404)
-        .json({ error: "No appointments found for this doctor" });
+        .json({
+          error: "No appointments found for this doctor on the given date",
+        });
     }
 
     return res.status(200).json({ appointments });
@@ -170,11 +181,49 @@ const getAppointmentsByDoctor = async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 };
- 
+const updateAppointmentStatus = async (req, res) => {
+  try {
+    const { appointment_id, appointment_status } = req.body;
+
+    // Validate input
+    const validStatuses = ["pending", "confirmed", "cancelled", "completed"];
+    if (!appointment_id || !appointment_status) {
+      return res.status(400).json({ error: "Missing required fields." });
+    }
+
+    if (!validStatuses.includes(appointment_status)) {
+      return res.status(400).json({ error: "Invalid status value." });
+    }
+
+    // Update the appointment
+    const [result] = await sequelize.query(
+      `UPDATE appointment SET appointment_status = ? WHERE appointment_id = ?`,
+      {
+        replacements: [appointment_status, appointment_id],
+      }
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Appointment not found." });
+    }
+
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "Appointment status updated successfully.",
+      });
+  } catch (err) {
+    console.error("Error updating appointment:", err);
+    return res.status(500).json({ error: "Internal server error." });
+  }
+};
+
 module.exports = {
   bookAppointment,
   getEmployeeAppointments,
   cancelAppointment,
   getAllAppointments,
   getAppointmentsByDoctor,
+  updateAppointmentStatus,
 };
