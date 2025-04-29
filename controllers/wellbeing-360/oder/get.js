@@ -16,12 +16,10 @@ const getOrdersByEmployee = async (req, res) => {
     );
 
     if (orders.length === 0) {
-      return res
-        .status(404)
-        .json({
-          success: false,
-          message: "No orders found for this employee.",
-        });
+      return res.status(404).json({
+        success: false,
+        message: "No orders found for this employee.",
+      });
     }
 
     const orderIds = orders.map((order) => order.order_id);
@@ -94,7 +92,86 @@ const getAllOrders = async (req, res) => {
       .json({ success: false, message: "Failed to fetch orders." });
   }
 };
+
+const getOrderById = async (req, res) => {
+  try {
+    const { order_id } = req.query;
+
+    if (!order_id) {
+      return res
+        .status(400)
+        .json({ success: false, message: "order_id is required." });
+    }
+
+    // 1. Get the order
+    const [orderData] = await sequelize.query(
+      `SELECT * FROM orders WHERE order_id = ?`,
+      { replacements: [order_id] }
+    );
+
+    if (orderData.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found." });
+    }
+
+    const order = orderData[0];
+
+    // 2. Get the items related to this order
+    const [items] = await sequelize.query(
+      `SELECT * FROM order_items WHERE order_id = ?`,
+      { replacements: [order_id] }
+    );
+
+    // 3. Combine order and items
+    const result = {
+      ...order,
+      items: items,
+    };
+
+    return res.status(200).json({ success: true, data: result });
+  } catch (error) {
+    console.error("Error fetching order by ID:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch order details." });
+  }
+};
+
+const getOrdersWithPaymentStatusByEmployee = async (req, res) => {
+  try {
+    const { employee_no } = req.query;
+
+    if (!employee_no) {
+      return res.status(400).json({ success: false, message: "employee_no is required." });
+    }
+
+    const [orders] = await sequelize.query(
+      `SELECT o.*, p.payment_status, p.amount 
+       FROM orders o
+       LEFT JOIN payments p ON o.order_id = p.order_id
+       WHERE o.employee_no = ?
+       ORDER BY o.placed_date DESC`,
+      { replacements: [employee_no] }
+    );
+
+    if (orders.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No orders found for this employee.",
+      });
+    }
+
+    return res.status(200).json({ success: true, data: orders });
+  } catch (error) {
+    console.error("Error fetching orders with payment status:", error);
+    return res.status(500).json({ success: false, message: "Failed to fetch orders." });
+  }
+};
+
+
 module.exports = {
   getOrdersByEmployee,
   getAllOrders,
+  getOrderById,
 };
