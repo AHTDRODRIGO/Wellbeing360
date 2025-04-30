@@ -143,7 +143,9 @@ const getOrdersWithPaymentStatusByEmployee = async (req, res) => {
     const { employee_no } = req.query;
 
     if (!employee_no) {
-      return res.status(400).json({ success: false, message: "employee_no is required." });
+      return res
+        .status(400)
+        .json({ success: false, message: "employee_no is required." });
     }
 
     const [orders] = await sequelize.query(
@@ -165,13 +167,113 @@ const getOrdersWithPaymentStatusByEmployee = async (req, res) => {
     return res.status(200).json({ success: true, data: orders });
   } catch (error) {
     console.error("Error fetching orders with payment status:", error);
-    return res.status(500).json({ success: false, message: "Failed to fetch orders." });
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch orders." });
   }
 };
 
+const getOrdersByEmployeeDetailed = async (req, res) => {
+  try {
+    const { employee_no } = req.query;
 
+    if (!employee_no) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing employee number.",
+      });
+    }
+
+    // 1. Fetch orders
+    const [orders] = await sequelize.query(
+      `SELECT * FROM orders WHERE employee_no = ? ORDER BY placed_date DESC`,
+      { replacements: [employee_no] }
+    );
+
+    if (!orders.length) {
+      return res.status(404).json({
+        success: false,
+        message: "No orders found for this employee.",
+      });
+    }
+
+    const orderIds = orders.map((o) => o.order_id);
+
+    // 2. Fetch items
+    const [items] = await sequelize.query(
+      `SELECT * FROM order_items WHERE order_id IN (${orderIds
+        .map(() => "?")
+        .join(",")})`,
+      { replacements: orderIds }
+    );
+
+    // 3. Fetch employee details
+    const [employeeDetails] = await sequelize.query(
+      `SELECT * FROM employee WHERE employee_no = ?`,
+      { replacements: [employee_no] }
+    );
+
+    // 4. Merge items with orders
+    const orderMap = {};
+    orders.forEach((order) => {
+      orderMap[order.order_id] = { ...order, items: [] };
+    });
+
+    items.forEach((item) => {
+      orderMap[item.order_id].items.push(item);
+    });
+
+    const result = {
+      employee: employeeDetails[0] || null,
+      orders: Object.values(orderMap),
+    };
+
+    return res.status(200).json({ success: true, data: result });
+  } catch (error) {
+    console.error("Error fetching employee orders:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+    });
+  }
+};
+const getAllPaymentsWithEmployee = async (req, res) => {
+  try {
+    const [results] = await sequelize.query(`
+      SELECT 
+        p.payment_id,
+        p.order_id,
+        p.employee_no,
+        p.amount,
+        p.payment_method,
+        p.payment_status,
+        p.payment_date,
+        e.name AS employee_name,
+        e.nic,
+        e.department,
+        e.designation
+      FROM payments p
+      LEFT JOIN employee e ON p.employee_no = e.employee_no
+      ORDER BY p.payment_date DESC
+    `);
+
+    res.status(200).json({
+      success: true,
+      data: results,
+    });
+  } catch (error) {
+    console.error("Error fetching payments with employee info:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch payments.",
+    });
+  }
+};
 module.exports = {
   getOrdersByEmployee,
   getAllOrders,
   getOrderById,
+  getOrdersWithPaymentStatusByEmployee,
+  getOrdersByEmployeeDetailed,
+  getAllPaymentsWithEmployee,
 };
