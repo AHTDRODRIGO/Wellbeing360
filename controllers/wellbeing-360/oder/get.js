@@ -122,7 +122,7 @@ const getOrderById = async (req, res) => {
       { replacements: [order_id] }
     );
 
-    // 3. For each item, check stock status
+    // 3. Check stock status for each item
     const itemsWithStockStatus = await Promise.all(
       items.map(async (item) => {
         if (!item.medicine_id || item.from_outdoor_pharmacy) {
@@ -145,10 +145,17 @@ const getOrderById = async (req, res) => {
       })
     );
 
-    // 4. Combine response
+    // 4. Determine status flow
+    const status_flow =
+      order.delivery_type === "pickup"
+        ? ["placed", "processing", "completed", "ready_to_pickup"]
+        : ["placed", "processing", "completed", "delivered"];
+
+    // 5. Final response
     const result = {
       ...order,
       items: itemsWithStockStatus,
+      status_flow, // added here
     };
 
     return res.status(200).json({ success: true, data: result });
