@@ -92,7 +92,6 @@ const getAllOrders = async (req, res) => {
       .json({ success: false, message: "Failed to fetch orders." });
   }
 };
-
 const getOrderById = async (req, res) => {
   try {
     const { order_id } = req.query;
@@ -117,16 +116,39 @@ const getOrderById = async (req, res) => {
 
     const order = orderData[0];
 
-    // 2. Get the items related to this order
+    // 2. Get the order items
     const [items] = await sequelize.query(
       `SELECT * FROM order_items WHERE order_id = ?`,
       { replacements: [order_id] }
     );
 
-    // 3. Combine order and items
+    // 3. For each item, check stock status
+    const itemsWithStockStatus = await Promise.all(
+      items.map(async (item) => {
+        if (!item.medicine_id || item.from_outdoor_pharmacy) {
+          return { ...item, stock_status: "Collect from outside" };
+        }
+
+        const [stockResult] = await sequelize.query(
+          `SELECT quantity_available FROM medicine WHERE medicine_id = ?`,
+          { replacements: [item.medicine_id] }
+        );
+
+        const quantity = stockResult[0]?.quantity_available ?? 0;
+        const stock_status =
+          quantity >= item.quantity_requested ? "In Stock" : "Out of Stock";
+
+        return {
+          ...item,
+          stock_status,
+        };
+      })
+    );
+
+    // 4. Combine response
     const result = {
       ...order,
-      items: items,
+      items: itemsWithStockStatus,
     };
 
     return res.status(200).json({ success: true, data: result });

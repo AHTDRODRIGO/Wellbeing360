@@ -3,18 +3,16 @@ const { sequelize } = require("../../../config/database");
 const addDoctor = async (req, res) => {
   try {
     const {
-      doctor_id,
       name,
       specialization,
       contact_number,
       email,
       work_location,
       availability,
-      active_status,
-    } = req.body; 
+    } = req.body;
 
+    // Validate required fields
     if (
-      !doctor_id ||
       !name ||
       !specialization ||
       !contact_number ||
@@ -25,12 +23,28 @@ const addDoctor = async (req, res) => {
       return res.status(400).json({ error: "All fields are required" });
     }
 
-    const query = `
+    // Step 1: Get latest doctor_id
+    const [latest] = await sequelize.query(
+      `SELECT doctor_id FROM doctor ORDER BY doctor_id DESC LIMIT 1`
+    );
+
+    let newIdNumber = 1;
+
+    if (latest.length > 0) {
+      const lastId = latest[0].doctor_id; // e.g., "DOC0002"
+      const numberPart = parseInt(lastId.replace("DOC", ""));
+      newIdNumber = numberPart + 1;
+    }
+
+    const doctor_id = `DOC${newIdNumber.toString().padStart(4, "0")}`; // e.g., "DOC0003"
+
+    // Step 2: Insert doctor with default active_status = true
+    const insertQuery = `
       INSERT INTO doctor 
       (doctor_id, name, specialization, contact_number, email, work_location, availability, active_status) 
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
 
-    await sequelize.query(query, {
+    await sequelize.query(insertQuery, {
       replacements: [
         doctor_id,
         name,
@@ -39,16 +53,20 @@ const addDoctor = async (req, res) => {
         email,
         work_location,
         availability,
-        active_status !== undefined ? active_status : true, // Default to active
+        true, // Set active_status = true by default
       ],
     });
 
-    return res.status(200).json({ message: "Doctor added successfully" });
+    return res.status(200).json({
+      message: "Doctor added successfully",
+      doctor_id,
+    });
   } catch (error) {
     console.error("Error adding doctor:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 };
+
 const getDoctors = async (req, res) => {
   try {
     const query = `SELECT * FROM doctor`;
@@ -169,6 +187,6 @@ module.exports = {
   addDoctor,
   getDoctors,
   getDoctorById,
-  deleteDoctor,
+  deleteDoctor, 
   updateDoctor,
 };
