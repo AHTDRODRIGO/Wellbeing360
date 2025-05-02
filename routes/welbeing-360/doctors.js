@@ -12,7 +12,12 @@ const {
   getUpcomingSchedulesByDoctor,
   updateDoctorSchedule,
   deleteDoctorSchedule,
-} = require("../../controllers/wellbeing-360/doctors/schedule");  
+} = require("../../controllers/wellbeing-360/doctors/schedule");
+const {
+  getAllAppointments,
+  getAppointmentsByDoctorId,
+  getEmployeeMedicalHistory,
+} = require("../../controllers/wellbeing-360/doctors/get");
 
 const router = express.Router();
 
@@ -29,5 +34,11 @@ router.get("/get-doctor-by-date", getDoctorsByDate);
 router.get("/upcoming-schedules", getUpcomingSchedulesByDoctor);
 router.put("/schedule", updateDoctorSchedule);
 router.delete("/schedule", deleteDoctorSchedule);
+
+//Appointment
+
+router.get("/appointments", getAllAppointments);
+router.get("/appointments-by-doctor", getAppointmentsByDoctorId);
+router.get("/medical-history", getEmployeeMedicalHistory);
 
 module.exports = router;

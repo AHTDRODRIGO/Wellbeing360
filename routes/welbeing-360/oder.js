@@ -10,7 +10,9 @@ const {
   getOrdersByEmployee,
   getAllOrders,
   getOrderById,
-  getOrdersByEmployeeDetailed,getAllPaymentsWithEmployee
+  getOrdersByEmployeeDetailed,
+  getAllPaymentsWithEmployee,
+  getDashboardStats,
 } = require("../../controllers/wellbeing-360/oder/get.js");
 
 router.get("/all", getAllOrders);
@@ -20,5 +22,6 @@ router.get("/by-employee", getOrdersByEmployee);
 router.get("/by-oder-id", getOrderById);
 router.get("/orders-by-employee", getOrdersByEmployeeDetailed);
 router.get("/payments-all", getAllPaymentsWithEmployee);
+router.get("/get-statistics", getDashboardStats);
 
 module.exports = router;

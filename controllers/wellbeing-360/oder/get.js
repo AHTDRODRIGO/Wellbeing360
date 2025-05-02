@@ -298,6 +298,101 @@ const getAllPaymentsWithEmployee = async (req, res) => {
     });
   }
 };
+const getDashboardStats = async (req, res) => {
+  try {
+    const { date } = req.query;
+    if (!date) {
+      return res.status(400).json({
+        success: false,
+        message: "Date is required",
+      });
+    }
+
+    const targetDate = new Date(date);
+    const pastDate = new Date(targetDate);
+    pastDate.setDate(pastDate.getDate() - 4); // Go 4 days back (total 5 days incl. today)
+
+    const formattedDate = (d) => d.toISOString().slice(0, 10);
+
+    // 1. Orders Per Day
+    const [ordersPerDay] = await sequelize.query(
+      `
+      SELECT DATE(placed_date) AS day, COUNT(*) AS total_orders
+      FROM orders
+      WHERE DATE(placed_date) BETWEEN ? AND ?
+      GROUP BY day
+      ORDER BY day DESC
+      `,
+      { replacements: [formattedDate(pastDate), formattedDate(targetDate)] }
+    );
+
+    // 2. Top Inventory Item
+    const [topInventoryItem] = await sequelize.query(
+      `
+      SELECT medicine_name, SUM(quantity_requested) AS total
+      FROM order_items
+      WHERE from_inventory = 1 AND order_id IN (
+        SELECT order_id FROM orders
+        WHERE DATE(placed_date) BETWEEN ? AND ?
+      )
+      GROUP BY medicine_name
+      ORDER BY total DESC
+      LIMIT 1
+      `,
+      { replacements: [formattedDate(pastDate), formattedDate(targetDate)] }
+    );
+
+    // 3. Income Per Day
+    const [incomePerDay] = await sequelize.query(
+      `
+      SELECT DATE(payment_date) AS day, SUM(amount) AS income
+      FROM payments
+      WHERE payment_status = 'paid' AND DATE(payment_date) BETWEEN ? AND ?
+      GROUP BY day
+      ORDER BY day DESC
+      `,
+      { replacements: [formattedDate(pastDate), formattedDate(targetDate)] }
+    );
+
+    // 4. Most Frequently Out-of-Stock Item
+    const [outOfStockItem] = await sequelize.query(
+      `
+      SELECT oi.medicine_name, COUNT(*) AS times_out_of_stock
+      FROM order_items oi
+      JOIN orders o ON oi.order_id = o.order_id
+      JOIN medicine m ON oi.medicine_id = m.medicine_id
+      WHERE DATE(o.placed_date) BETWEEN ? AND ? 
+        AND m.quantity_available < oi.quantity_requested
+      GROUP BY oi.medicine_name
+      ORDER BY times_out_of_stock DESC
+      LIMIT 1
+      `,
+      { replacements: [formattedDate(pastDate), formattedDate(targetDate)] }
+    );
+
+    // ✅ Return all stats
+    return res.status(200).json({
+      success: true,
+      data: {
+        date_range: {
+          from: formattedDate(pastDate),
+          to: formattedDate(targetDate),
+        },
+        orders_per_day: ordersPerDay,
+        top_inventory_item: topInventoryItem[0] || null,
+        income_per_day: incomePerDay,
+        most_out_of_stock_item: outOfStockItem[0] || null,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching dashboard stats:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
 module.exports = {
   getOrdersByEmployee,
   getAllOrders,
@@ -305,4 +400,5 @@ module.exports = {
   getOrdersWithPaymentStatusByEmployee,
   getOrdersByEmployeeDetailed,
   getAllPaymentsWithEmployee,
+  getDashboardStats,
 };
