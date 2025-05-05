@@ -22,14 +22,14 @@ const Order = require("./routes/welbeing-360/oder.js");
 // require("./models/Inventry.js");
 // require("./models/Prescription.js");
 // require("./models/Prescription-items.js");
-//  
+// require("./models/Payment.js");
 
 const app = express();
 const server = http.createServer(app); // Create HTTP server
 const io = socketConfig.init(server); // Initialize Socket.IO with the HTTP server
 
 const PORT = process.env.PORT || 8599;
- 
+
 // Middleware
 app.use(express.json());
 app.use(
@@ -42,16 +42,16 @@ app.use(
 // Sync all models with the database
 // sequelize
 //   .sync({ alter: true })
-//   .then(() => console.log("All models synchronized successfully."))  
+//   .then(() => console.log("All models synchronized successfully."))
 //   .catch((error) => console.error("Error syncing models:", error));
- 
+
 // Define Routes
 app.use("/v1/wellbeing360/employees", EmployeeRoutes);
 app.use("/v1/wellbeing360/doctors", DoctorRoutes);
 app.use("/v1/wellbeing360/appointment", Appointment);
 app.use("/v1/wellbeing360/inventry", Inventrry);
 app.use("/v1/wellbeing360/prescription", Prescription);
-app.use("/v1/wellbeing360/oder",Order);
+app.use("/v1/wellbeing360/oder", Order);
 
 // 404 Error Handling
 app.use((req, res) => {
@@ -62,5 +62,3 @@ app.use((req, res) => {
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
-
-
