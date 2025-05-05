@@ -126,7 +126,7 @@ const getEmployeeMedicalHistory = async (req, res) => {
     });
   }
 };
-
+ 
 module.exports = {
   getAllAppointments,
   getAppointmentsByDoctorId,
